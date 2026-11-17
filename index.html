@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notes to study set</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6f8fa; --grid: #e4eaf0; --ink: #12263a; --muted: #52667a;
+    --rule: #c9d3dc; --panel: #ffffff; --mark: #ffe066; --ok: #1f7a4d; --bad: #b3261e;
+    --serif: "Newsreader", Georgia, serif; --sans: "Hanken Grotesk", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #0f1a26; --grid: #172636; --ink: #e8eef4; --muted: #9db0c2;
+            --rule: #2b3e51; --panel: #15222f; --mark: #e6c200; --ok: #5fcf97; --bad: #ff8a80; }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 1rem; }
+  body {
+    margin: 0; color: var(--ink); font: 400 1rem/1.6 var(--sans);
+    background-color: var(--paper);
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  h1 { font: 600 2.4rem/1.15 var(--serif); margin: 0 0 .5rem; }
+  .lede { color: var(--muted); margin: 0 0 2rem; max-width: 56ch; }
+  h2 { font: 600 1.5rem/1.3 var(--serif); margin: 0 0 .75rem; }
+  .panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 1.25rem; }
+  label { display: block; font-weight: 500; margin-bottom: .35rem; }
+  textarea, input[type=number] {
+    width: 100%; font: inherit; color: inherit; background: var(--paper);
+    border: 1px solid var(--rule); border-radius: 4px; padding: .6rem .7rem;
+  }
+  textarea { min-height: 150px; resize: vertical; }
+  :focus-visible { outline: 3px solid var(--mark); outline-offset: 2px; }
+  .drop { display: block; border: 1.5px dashed var(--rule); border-radius: 4px; padding: 1.1rem; text-align: center; color: var(--muted); cursor: pointer; margin-bottom: 1rem; }
+  .drop:hover, .drop.over { border-color: var(--ink); color: var(--ink); }
+  .drop input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .drop:focus-within { outline: 3px solid var(--mark); outline-offset: 2px; }
+  .row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: end; margin-top: 1rem; }
+  .row > div { flex: 1 1 140px; }
+  button { font: 700 1rem var(--sans); cursor: pointer; border-radius: 4px; border: 1px solid var(--ink); padding: .65rem 1.2rem; }
+  .primary { background: var(--ink); color: var(--paper); }
+  .primary:disabled { opacity: .5; cursor: progress; }
+  .ghost { background: transparent; color: var(--ink); }
+  .error { margin-top: 1rem; padding: .7rem .9rem; border-left: 4px solid var(--bad); background: var(--panel); }
+  [hidden] { display: none !important; }
+
+  #results { margin-top: 2.5rem; }
+  .tabs { display: flex; gap: .25rem; border-bottom: 1px solid var(--rule); margin-bottom: 1.5rem; }
+  .tabs button { border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: none; color: var(--muted); padding: .6rem 1rem; }
+  .tabs button[aria-selected=true] { color: var(--ink); border-bottom-color: var(--mark); }
+  .summary { font: 400 1.15rem/1.7 var(--serif); max-width: 62ch; margin: 0 0 1.5rem; }
+  .points { padding-left: 1.2rem; max-width: 62ch; }
+  .points li { margin-bottom: .4rem; }
+
+  .card { perspective: 900px; width: 100%; min-height: 220px; background: none; border: 0; padding: 0; text-align: left; color: inherit; }
+  .card-inner { position: relative; min-height: 220px; transition: transform .45s; transform-style: preserve-3d; }
+  .card[aria-pressed=true] .card-inner { transform: rotateY(180deg); }
+  .face { position: absolute; inset: 0; backface-visibility: hidden; border: 1px solid var(--ink); border-radius: 6px; padding: 1.5rem; display: flex; align-items: center; justify-content: center; text-align: center; font: 600 1.3rem/1.4 var(--serif); }
+  .front { background: var(--mark); color: #12263a; }
+  .back { background: var(--panel); transform: rotateY(180deg); font-weight: 400; }
+  .deck-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .card-inner { transition: none; } }
+
+  .q { margin-bottom: 1.75rem; }
+  .q p { font-weight: 700; margin: 0 0 .5rem; }
+  .opt { display: block; width: 100%; text-align: left; background: var(--panel); border: 1px solid var(--rule); margin-bottom: .4rem; font-weight: 400; }
+  .opt:hover:not(:disabled) { border-color: var(--ink); }
+  .opt.right { border-color: var(--ok); border-width: 2px; background: var(--panel); }
+  .opt.wrong { border-color: var(--bad); border-width: 2px; }
+  .why { color: var(--muted); margin: .4rem 0 0; }
+  .score { font: 600 1.4rem var(--serif); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Turn your notes into a study set</h1>
+  <p class="lede">Upload lecture notes or paste them in. You get a summary, flashcards and a practice quiz.</p>
+
+  <form id="form" class="panel">
+    <label class="drop" id="drop">
+      <span id="dropText">Choose a PDF or text file, or drop it here</span>
+      <input type="file" id="file" accept=".pdf,.txt,.md">
+    </label>
+    <label for="text">Or paste your notes</label>
+    <textarea id="text" placeholder="Paste lecture notes here"></textarea>
+    <div class="row">
+      <div><label for="cards">Flashcards</label><input id="cards" type="number" min="3" max="20" value="8"></div>
+      <div><label for="qs">Quiz questions</label><input id="qs" type="number" min="3" max="15" value="5"></div>
+      <div><button class="primary" id="go" type="submit">Create study set</button></div>
+    </div>
+    <div class="error" id="error" role="alert" hidden></div>
+  </form>
+
+  <section id="results" hidden>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="summary">Summary</button>
+      <button role="tab" aria-selected="false" data-tab="cards">Flashcards</button>
+      <button role="tab" aria-selected="false" data-tab="quiz">Quiz</button>
+    </div>
+    <div id="summary"></div>
+    <div id="cards-view" hidden></div>
+    <div id="quiz" hidden></div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const el = (tag, props = {}, ...kids) => {
+  const n = Object.assign(document.createElement(tag), props);
+  kids.forEach(k => n.append(k));
+  return n;
+};
+
+// ---- file picking ----
+const fileInput = $('file'), drop = $('drop');
+fileInput.addEventListener('change', () => {
+  $('dropText').textContent = fileInput.files[0] ? fileInput.files[0].name : 'Choose a PDF or text file, or drop it here';
+});
+['dragover', 'dragenter'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(e => drop.addEventListener(e, () => drop.classList.remove('over')));
+drop.addEventListener('drop', ev => {
+  ev.preventDefault();
+  if (ev.dataTransfer.files.length) { fileInput.files = ev.dataTransfer.files; fileInput.dispatchEvent(new Event('change')); }
+});
+
+// ---- submit ----
+$('form').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const fd = new FormData();
+  if (fileInput.files[0]) fd.append('file', fileInput.files[0]);
+  if ($('text').value.trim()) fd.append('text', $('text').value);
+  fd.append('flashcards', $('cards').value);
+  fd.append('questions', $('qs').value);
+
+  const btn = $('go'), err = $('error');
+  err.hidden = true; btn.disabled = true; btn.textContent = 'Creating your study set...';
+  try {
+    const res = await fetch('/api/study', { method: 'POST', body: fd });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Something went wrong. Try again.');
+    render(data);
+  } catch (e) {
+    err.textContent = e.message; err.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create study set';
+  }
+});
+
+// ---- tabs ----
+const views = { summary: $('summary'), cards: $('cards-view'), quiz: $('quiz') };
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+function showTab(name) {
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name));
+  Object.entries(views).forEach(([k, v]) => v.hidden = k !== name);
+}
+
+// ---- render ----
+function render(d) {
+  $('results').hidden = false;
+  views.summary.replaceChildren(
+    el('h2', { textContent: 'Summary' }),
+    el('p', { className: 'summary', textContent: d.summary || '' }),
+    el('h2', { textContent: 'Key points' }),
+    el('ul', { className: 'points' }, ...(d.keyPoints || []).map(p => el('li', { textContent: p })))
+  );
+  renderCards(d.flashcards || []);
+  renderQuiz(d.quiz || []);
+  showTab('summary');
+  $('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderCards(cards) {
+  const box = views.cards;
+  if (!cards.length) { box.replaceChildren(el('p', { textContent: 'No flashcards were generated.' })); return; }
+  let i = 0;
+  const card = el('button', { type: 'button', className: 'card' });
+  card.setAttribute('aria-pressed', 'false');
+  const front = el('div', { className: 'face front' });
+  const back = el('div', { className: 'face back' });
+  card.append(el('div', { className: 'card-inner' }, front, back));
+  const count = el('span');
+  const show = () => {
+    card.setAttribute('aria-pressed', 'false');
+    front.textContent = cards[i].front; back.textContent = cards[i].back;
+    count.textContent = `Card ${i + 1} of ${cards.length}. Click the card to flip it.`;
+  };
+  card.addEventListener('click', () => card.setAttribute('aria-pressed', card.getAttribute('aria-pressed') !== 'true'));
+  const prev = el('button', { className: 'ghost', type: 'button', textContent: 'Previous' });
+  const next = el('button', { className: 'ghost', type: 'button', textContent: 'Next' });
+  prev.onclick = () => { i = (i - 1 + cards.length) % cards.length; show(); };
+  next.onclick = () => { i = (i + 1) % cards.length; show(); };
+  box.replaceChildren(card, el('div', { className: 'deck-nav' }, prev, count, next));
+  show();
+}
+
+function renderQuiz(quiz) {
+  const box = views.quiz;
+  if (!quiz.length) { box.replaceChildren(el('p', { textContent: 'No quiz questions were generated.' })); return; }
+  let answered = 0, correct = 0;
+  const score = el('p', { className: 'score', textContent: `Score: 0 of ${quiz.length}` });
+  const items = quiz.map(q => {
+    const why = el('p', { className: 'why', hidden: true, textContent: q.explanation || '' });
+    const btns = q.options.map((o, idx) => {
+      const b = el('button', { type: 'button', className: 'opt', textContent: o });
+      b.onclick = () => {
+        btns.forEach(x => x.disabled = true);
+        btns[q.answerIndex].classList.add('right');
+        if (idx === q.answerIndex) correct++; else b.classList.add('wrong');
+        answered++; why.hidden = false;
+        score.textContent = `Score: ${correct} of ${quiz.length}` + (answered === quiz.length ? ' (finished)' : '');
+      };
+      return b;
+    });
+    return el('div', { className: 'q' }, el('p', { textContent: q.question }), ...btns, why);
+  });
+  box.replaceChildren(score, ...items);
+}
+</script>
+</body>
+</html>
